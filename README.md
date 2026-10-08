@@ -1,11 +1,54 @@
 # global-ecom-ai
 
-Sàn thương mại điện tử có AI hỗ trợ.
+Nền tảng giúp cơ sở nông sản Việt tạo và quản lý gian hàng riêng bằng ảnh và hội thoại. Mỗi doanh nghiệp có dữ
+liệu, thương hiệu và đường dẫn riêng trên cùng một hệ thống. Khách hàng pilot: Nông sản Thịnh Phát.
 
-## Giai đoạn 1 — Nghiên cứu thiết kế
-- Trang tham khảo: https://cocoonvietnam.com/ (mỹ phẩm thuần chay Việt Nam)
-- Ghi chép phân tích: [docs/design-study-cocoon.md](docs/design-study-cocoon.md)
+Tài liệu nền: [`docs/reference/agri-commerce/`](docs/reference/agri-commerce/README.md) ·
+Quyết định kỹ thuật: [`docs/decisions/`](docs/decisions/).
 
-## Giai đoạn 2 — Khung sàn (dự kiến)
-- Trang chủ, danh mục, trang sản phẩm, giỏ hàng, thanh toán
-- AI: tìm kiếm ngôn ngữ tự nhiên, tư vấn sản phẩm, viết mô tả cho người bán
+## Trạng thái
+
+| Bước | Trạng thái |
+| --- | --- |
+| 1. Tenant, membership, catalog, asset, RLS, storage policies, 2 tenant demo | Đã làm, có kiểm thử trên Postgres thật |
+| 2. Storefront renderer, trang công khai, draft/publish/rollback, JSON-LD, sitemap | Trang công khai + publish đã chạy; **chưa có console/preview cho người bán** |
+| 3. Upload → job/worker → AI draft | Chưa làm |
+| 4. RFQ → báo giá → đơn hàng | Chưa làm (nút hỏi giá hiện ghi rõ là chưa nhận yêu cầu) |
+
+## Chạy local
+
+Cần Node 22+ và PostgreSQL 16 chạy ở localhost (không cần Docker/Supabase cho phần hiện tại).
+
+```bash
+npm install
+# tạo role local một lần, ví dụ: createuser --superuser agri && psql -c "alter role agri password 'agri'"
+cp .env.example .env.local   # đặt DATABASE_URL=postgres://agri:agri@localhost:5432/agri_dev, SITE_URL=http://localhost:3000
+npm run db:reset             # tạo lại DB local: shim Supabase + migrations + seed demo
+npm run dev                  # http://localhost:3000/s/vuon-mau-demo
+```
+
+Kiểm tra:
+
+```bash
+npm run typecheck
+npm test        # tự tạo DB agri_test (đổi bằng TEST_DATABASE_URL)
+npm run build
+```
+
+`npm run db:reset` và test chỉ chạy với host localhost.
+
+## Biến môi trường
+
+Xem [`.env.example`](.env.example): `DATABASE_URL`, `SITE_URL`, `NEXT_PUBLIC_SUPABASE_URL`,
+`NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` (chỉ server/worker), `ANTHROPIC_API_KEY` (bước 3).
+
+## Cấu trúc
+
+```
+supabase/migrations/   schema, ràng buộc, RLS, hàm publish/approve, storage policies
+supabase/seed.sql      2 tenant demo (Vườn Mẫu DEMO; Thịnh Phát chỉ có tên sản phẩm, ở trạng thái nháp)
+src/modules/           storefront (sections, theme, draft, public read), catalog (định dạng), seo (JSON-LD)
+src/components/        renderer gian hàng
+src/app/               /s/[storeSlug], /s/[storeSlug]/san-pham/[productSlug], sitemap, robots
+tests/                 integration (RLS, storage, publish) + unit; tests/db/supabase-shim.sql chỉ dùng local
+```
