@@ -5,10 +5,11 @@ import type { PublishedStorefront } from "@/modules/storefront/public-read";
 import { ASSISTANT_RULES, storeFacts } from "./context";
 
 export type ChatTurn = { role: "user" | "assistant"; content: string };
-export type ChatReply = { text: string; provider: "claude" | "mock"; refused?: boolean };
+export type ProviderName = "claude" | "openai_compatible" | "mock";
+export type ChatReply = { text: string; provider: ProviderName; refused?: boolean };
 
 export interface ChatProvider {
-  readonly name: "claude" | "mock";
+  readonly name: ProviderName;
   reply(store: PublishedStorefront, turns: ChatTurn[]): Promise<ChatReply>;
 }
 
@@ -59,7 +60,7 @@ const strip = (s: string) =>
     .replace(/Đ/g, "D")
     .toLowerCase();
 
-export const MOCK_LABEL = "[Trả lời tự động, chưa dùng AI — máy chủ chưa cấu hình ANTHROPIC_API_KEY]";
+export const MOCK_LABEL = "[Trả lời tự động, chưa dùng AI — máy chủ chưa cấu hình nhà cung cấp AI]";
 
 /**
  * Keyword lookup over the published catalog, used when no Anthropic credentials are configured. It is NOT AI and
@@ -103,8 +104,54 @@ export class MockChatProvider implements ChatProvider {
   }
 }
 
-/** Uses Claude when credentials are configured, otherwise the labelled mock. */
-export function defaultChatProvider(): ChatProvider {
-  const hasCredentials = Boolean(process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_AUTH_TOKEN);
-  return hasCredentials ? new ClaudeChatProvider() : new MockChatProvider();
+export type OpenAICompatibleConfig = { baseUrl: string; apiKey: string; model: string; timeoutMs?: number };
+
+/**
+ * Any provider exposing the common `POST {baseUrl}/chat/completions` format (many Vietnamese AI gateways do).
+ * Configured with AI_BASE_URL / AI_API_KEY / AI_MODEL. Same grounding rules and facts as the Claude provider.
+ */
+export class OpenAICompatibleChatProvider implements ChatProvider {
+  readonly name = "openai_compatible" as const;
+  constructor(
+    private readonly config: OpenAICompatibleConfig,
+    private readonly fetchImpl: typeof fetch = fetch,
+  ) {}
+
+  async reply(store: PublishedStorefront, turns: ChatTurn[]): Promise<ChatReply> {
+    const url = `${this.config.baseUrl.replace(/\/+$/, "")}/chat/completions`;
+    const res = await this.fetchImpl(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${this.config.apiKey}` },
+      body: JSON.stringify({
+        model: this.config.model,
+        max_tokens: 800,
+        temperature: 0.2,
+        messages: [
+          { role: "system", content: `${ASSISTANT_RULES}\n\n# Dữ liệu cửa hàng\n\n${storeFacts(store)}` },
+          ...turns.map((t) => ({ role: t.role, content: t.content })),
+        ],
+      }),
+      signal: AbortSignal.timeout(this.config.timeoutMs ?? 30_000),
+    });
+    if (!res.ok) {
+      // Do not echo the provider's body: it can contain request details. Status is enough for the log.
+      throw new Error(`AI provider responded ${res.status}`);
+    }
+    const data = (await res.json()) as { choices?: { message?: { content?: unknown } }[] };
+    const content = data.choices?.[0]?.message?.content;
+    const text = typeof content === "string" ? content.trim() : "";
+    return { text: text || "Xin lỗi, mình chưa có câu trả lời. Bạn vui lòng thử hỏi lại.", provider: "openai_compatible" };
+  }
+}
+
+/**
+ * Picks the provider from server configuration: an OpenAI-compatible gateway when AI_BASE_URL, AI_API_KEY and AI_MODEL
+ * are all set; otherwise Claude when Anthropic credentials are set; otherwise the labelled non-AI mock.
+ */
+export function defaultChatProvider(env: Record<string, string | undefined> = process.env): ChatProvider {
+  if (env.AI_BASE_URL && env.AI_API_KEY && env.AI_MODEL) {
+    return new OpenAICompatibleChatProvider({ baseUrl: env.AI_BASE_URL, apiKey: env.AI_API_KEY, model: env.AI_MODEL });
+  }
+  if (env.ANTHROPIC_API_KEY || env.ANTHROPIC_AUTH_TOKEN) return new ClaudeChatProvider();
+  return new MockChatProvider();
 }

@@ -14,7 +14,7 @@ Quyết định kỹ thuật: [`docs/decisions/`](docs/decisions/).
 | 2. Storefront renderer, trang công khai, draft/publish/rollback, JSON-LD, sitemap | Trang công khai + publish đã chạy; **chưa có console/preview cho người bán** |
 | 3. Upload → job/worker → AI draft | Chưa làm |
 | 4. RFQ → báo giá → đơn hàng | Chưa làm (nút hỏi giá hiện ghi rõ là chưa nhận yêu cầu) |
-| Chatbot hỏi đáp trên gian hàng | Đã làm: chỉ trả lời từ bản đã xuất bản. Có `ANTHROPIC_API_KEY` thì dùng Claude; chưa có thì trả lời tự động theo từ khóa, ghi rõ "chưa dùng AI" |
+| Chatbot hỏi đáp trên gian hàng | Đã làm: chỉ trả lời từ bản đã xuất bản. Dùng nhà cung cấp kiểu OpenAI-compatible (`AI_BASE_URL`/`AI_API_KEY`/`AI_MODEL`) hoặc Claude (`ANTHROPIC_API_KEY`); chưa cấu hình thì trả lời tự động theo từ khóa, ghi rõ "chưa dùng AI" |
 | Nhập dữ liệu từ website người bán | Công cụ đã có và đã test với website giả; **chưa chạy với nongsanthinhphat.com** vì môi trường chặn tên miền |
 
 ## Nhập dữ liệu từ website có sẵn
@@ -48,6 +48,10 @@ npm run build
 ```
 
 `npm run db:reset` và test chỉ chạy với host localhost.
+
+## Deploy
+
+Xem [`docs/DEPLOY.md`](docs/DEPLOY.md).
 
 ## Biến môi trường
 

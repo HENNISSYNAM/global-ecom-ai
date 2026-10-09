@@ -110,3 +110,40 @@ describe("chat request handling", () => {
     expect([allow("a", 0), allow("a", 1), allow("a", 2), allow("b", 2), allow("a", 1001)]).toEqual([true, true, false, true, true]);
   });
 });
+
+describe("OpenAI-compatible provider", () => {
+  it("sends bearer auth, the grounding rules and facts, and reads the first choice", async () => {
+    const { OpenAICompatibleChatProvider } = await import("@/modules/assistant/provider");
+    const seen: { url: string; init: RequestInit }[] = [];
+    const fakeFetch = (async (url: string, init: RequestInit) => {
+      seen.push({ url, init });
+      return new Response(JSON.stringify({ choices: [{ message: { content: " Dạ có ạ. " } }] }), { status: 200 });
+    }) as unknown as typeof fetch;
+    const provider = new OpenAICompatibleChatProvider({ baseUrl: "https://gw.test/v1/", apiKey: "k-test", model: "m-test" }, fakeFetch);
+    const reply = await provider.reply(await demoStore(), [{ role: "user", content: "Có trà không?" }]);
+
+    expect(reply).toEqual({ text: "Dạ có ạ.", provider: "openai_compatible" });
+    expect(seen[0]!.url).toBe("https://gw.test/v1/chat/completions");
+    expect((seen[0]!.init.headers as Record<string, string>).Authorization).toBe("Bearer k-test");
+    const body = JSON.parse(String(seen[0]!.init.body));
+    expect(body.model).toBe("m-test");
+    expect(body.messages[0].role).toBe("system");
+    expect(body.messages[0].content).toContain("Không bao giờ tự tạo giá");
+    expect(body.messages[0].content).toContain("Trà xanh sấy khô (DEMO)");
+    expect(body.messages.at(-1)).toEqual({ role: "user", content: "Có trà không?" });
+  });
+
+  it("fails with the status only, without leaking the provider body", async () => {
+    const { OpenAICompatibleChatProvider } = await import("@/modules/assistant/provider");
+    const fakeFetch = (async () => new Response("secret details", { status: 401 })) as unknown as typeof fetch;
+    const provider = new OpenAICompatibleChatProvider({ baseUrl: "https://gw.test/v1", apiKey: "k", model: "m" }, fakeFetch);
+    await expect(provider.reply(await demoStore(), [{ role: "user", content: "x" }])).rejects.toThrow("AI provider responded 401");
+  });
+
+  it("is chosen only when base URL, key and model are all configured", async () => {
+    const { defaultChatProvider } = await import("@/modules/assistant/provider");
+    expect(defaultChatProvider({ AI_BASE_URL: "https://gw.test/v1", AI_API_KEY: "k", AI_MODEL: "m" }).name).toBe("openai_compatible");
+    expect(defaultChatProvider({ AI_BASE_URL: "https://gw.test/v1", AI_API_KEY: "k" }).name).toBe("mock");
+    expect(defaultChatProvider({}).name).toBe("mock");
+  });
+});
