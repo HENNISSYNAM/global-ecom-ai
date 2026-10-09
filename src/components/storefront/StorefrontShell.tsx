@@ -3,6 +3,7 @@ import type { CSSProperties, ReactNode } from "react";
 import { storefrontPath } from "@/lib/site";
 import type { PublishedStorefront } from "@/modules/storefront/public-read";
 import { googleFontsHref, themeToCssVariables } from "@/modules/storefront/theme";
+import { ChatWidget } from "./ChatWidget";
 
 export function StorefrontShell({ store, children }: { store: PublishedStorefront; children: ReactNode }) {
   const announcement = store.sections.find((s) => s.type === "announcement");
@@ -69,6 +70,7 @@ export function StorefrontShell({ store, children }: { store: PublishedStorefron
           Liên hệ
         </a>
       )}
+      <ChatWidget storeSlug={store.slug} storeName={displayName} />
     </div>
   );
 }

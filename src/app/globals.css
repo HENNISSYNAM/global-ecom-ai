@@ -666,3 +666,151 @@ a {
   opacity: 0.75;
   font-size: 13px;
 }
+
+/* ---------------------------------------------------------------- chat drawer */
+
+.sf-chat-opener {
+  position: fixed;
+  right: var(--gutter);
+  bottom: 20px;
+  z-index: 30;
+  background: var(--c-fg);
+  color: var(--c-bg);
+  border: 0;
+  border-radius: 999px;
+  padding: 12px 20px;
+  font: 700 15px var(--f-body);
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgb(31 28 23 / 0.18);
+}
+
+/* The phone pill sits above the chat button when both are shown. */
+.sf-contact-pill {
+  bottom: 76px;
+}
+
+.sf-chat-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: rgb(31 28 23 / 0.45);
+}
+
+.sf-chat {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 50;
+  width: min(420px, 100vw);
+  background: var(--c-bg);
+  display: grid;
+  grid-template-rows: auto 1fr auto auto;
+  box-shadow: -8px 0 30px rgb(31 28 23 / 0.15);
+}
+
+.sf-chat[hidden] {
+  display: none;
+}
+
+.sf-chat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px var(--gutter);
+  border-bottom: 1px solid var(--c-line);
+}
+
+.sf-chat-title {
+  font-family: var(--f-display);
+  font-weight: 500;
+  font-size: 22px;
+  margin: 0;
+}
+
+.sf-chat-close {
+  background: none;
+  border: 0;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--c-fg);
+  padding: 4px 8px;
+}
+
+.sf-chat-log {
+  overflow-y: auto;
+  padding: 16px var(--gutter);
+  display: grid;
+  gap: 10px;
+  align-content: start;
+}
+
+.sf-chat-msg {
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 4px;
+  white-space: pre-line;
+  max-width: 88%;
+  font-size: 15px;
+}
+
+.sf-chat-msg--user {
+  justify-self: end;
+  background: var(--c-fg);
+  color: var(--c-bg);
+}
+
+.sf-chat-msg--assistant {
+  justify-self: start;
+  background: var(--c-surface);
+}
+
+.sf-chat-error {
+  margin: 0;
+  color: #9b2c1f;
+  font-size: 14px;
+}
+
+.sf-chat-form {
+  display: flex;
+  gap: 8px;
+  padding: 12px var(--gutter);
+  border-top: 1px solid var(--c-line);
+}
+
+.sf-chat-form textarea {
+  flex: 1;
+  resize: none;
+  font: 16px var(--f-body);
+  padding: 10px;
+  border: 1px solid var(--c-line);
+  border-radius: 4px;
+  background: #fff;
+  color: var(--c-fg);
+}
+
+.sf-chat-send {
+  border: 0;
+  border-radius: 4px;
+  background: var(--c-fg);
+  color: var(--c-bg);
+  padding: 0 18px;
+  font: 600 16px var(--f-action);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+
+.sf-chat-send:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.sf-chat-disclaimer {
+  margin: 0;
+  padding: 0 var(--gutter) 14px;
+  font-size: 12px;
+  color: var(--c-muted);
+}

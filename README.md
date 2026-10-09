@@ -14,6 +14,18 @@ Quyết định kỹ thuật: [`docs/decisions/`](docs/decisions/).
 | 2. Storefront renderer, trang công khai, draft/publish/rollback, JSON-LD, sitemap | Trang công khai + publish đã chạy; **chưa có console/preview cho người bán** |
 | 3. Upload → job/worker → AI draft | Chưa làm |
 | 4. RFQ → báo giá → đơn hàng | Chưa làm (nút hỏi giá hiện ghi rõ là chưa nhận yêu cầu) |
+| Chatbot hỏi đáp trên gian hàng | Đã làm: chỉ trả lời từ bản đã xuất bản. Có `ANTHROPIC_API_KEY` thì dùng Claude; chưa có thì trả lời tự động theo từ khóa, ghi rõ "chưa dùng AI" |
+| Nhập dữ liệu từ website người bán | Công cụ đã có và đã test với website giả; **chưa chạy với nongsanthinhphat.com** vì môi trường chặn tên miền |
+
+## Nhập dữ liệu từ website có sẵn
+
+```bash
+npm run import:site -- https://nongsanthinhphat.com/ --max-pages 60
+```
+
+Kết quả nằm ở `data/imports/<host>/<thời gian>/` (không commit): `crawl.json`, ảnh trong `images/`, và `REVIEW.md` liệt
+kê sản phẩm phát hiện. Đây là tư liệu chờ người bán xác nhận; công cụ không ghi gì vào database và không xuất bản.
+Chỉ dùng với website của người bán khi họ đồng ý.
 
 ## Chạy local
 
