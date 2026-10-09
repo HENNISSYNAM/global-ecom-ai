@@ -8,6 +8,14 @@ Trang gian hàng đọc dữ liệu từ Postgres ở mỗi request. **Không c�
 trang gian hàng sẽ lỗi.** Cần một Postgres (khuyên dùng Supabase project riêng cho sàn) đã chạy các migration trong
 `supabase/migrations/`. Không chạy `tests/db/supabase-shim.sql` trên Supabase.
 
+## Trạng thái project Supabase `oagpgunqdzogbrpveeqg`
+
+- Đã áp 4 migration trong `supabase/migrations/` (kể cả thu hồi quyền chạy hàm mặc định của `anon`).
+- Đã nạp dữ liệu demo: 4 người dùng demo (không đăng nhập được), 2 doanh nghiệp, 8 sản phẩm, duyệt 2 sản phẩm demo,
+  tạo 2 gian hàng.
+- **Còn lại:** chạy một lần `supabase/finish-demo-storefronts.sql` trong SQL Editor để gán bố cục và xuất bản gian hàng
+  demo. Trước bước này `/s/vuon-mau-demo` sẽ trả 404.
+
 ## Các bước
 
 1. vercel.com → **Add New… → Project** → chọn repo `HENNISSYNAM/global-ecom-ai` → Framework: Next.js (tự nhận).

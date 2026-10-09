@@ -75,3 +75,9 @@ begin
 end;
 $$;
 grant execute on function storage.foldername(text) to anon, authenticated, service_role;
+
+-- Supabase grants anon/authenticated/service_role broad default privileges on new objects in `public`.
+-- Mirror that here so tests catch any table or function that migrations forget to lock down.
+alter default privileges in schema public grant all on tables to anon, authenticated, service_role;
+alter default privileges in schema public grant all on sequences to anon, authenticated, service_role;
+alter default privileges in schema public grant execute on functions to anon, authenticated, service_role;

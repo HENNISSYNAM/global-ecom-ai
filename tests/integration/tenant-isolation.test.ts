@@ -146,6 +146,16 @@ describe("anonymous visitors", () => {
     });
   });
 
+  it("have no EXECUTE privilege on command functions (Supabase grants it by default)", async () => {
+    const rows = await sql<{ fn: string; allowed: boolean }[]>`
+      select p.oid::regprocedure::text as fn, has_function_privilege('anon', p.oid, 'execute') as allowed
+      from pg_proc p
+      where p.pronamespace = 'public'::regnamespace
+        and p.proname in ('create_tenant', 'approve_product', 'create_storefront', 'publish_storefront', 'rollback_storefront')`;
+    expect(rows.length).toBe(5);
+    expect(rows.filter((r) => r.allowed).map((r) => r.fn)).toEqual([]);
+  });
+
   it("cannot call privileged functions", async () => {
     await inRollback(sql, async (tx) => {
       const err = await sqlError(as(tx, "anon", (t) => t`select approve_product(${IDS.productA3Draft})`));
