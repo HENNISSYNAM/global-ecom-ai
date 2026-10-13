@@ -70,3 +70,13 @@ export function productJsonLd(input: {
 export function serializeJsonLd(data: JsonLd | JsonLd[]): string {
   return JSON.stringify(data).replace(/</g, "\\u003c");
 }
+
+/** FAQPage from the seller's FAQ sections — the same questions and answers that are visible on the page. */
+export function faqJsonLd(items: { question: string; answer: string }[]): JsonLd | null {
+  if (!items.length) return null;
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: items.map((i) => ({ "@type": "Question", name: i.question, acceptedAnswer: { "@type": "Answer", text: i.answer } })),
+  };
+}

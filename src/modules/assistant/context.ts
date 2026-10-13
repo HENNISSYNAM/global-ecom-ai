@@ -21,6 +21,7 @@ export function storeFacts(store: PublishedStorefront): string {
     if (s.type === "fact_list") return [`## ${s.title}`, ...s.items.map((i) => `- ${i.title}: ${i.body}`)];
     if (s.type === "story_panel") return [`## ${s.title}`, s.body];
     if (s.type === "rfq_cta") return [`## ${s.title}`, ...(s.body ? [s.body] : [])];
+    if (s.type === "faq") return [`## ${s.title}`, ...s.items.map((i) => `- Hỏi: ${i.question} — Đáp: ${i.answer}`)];
     return [];
   });
   if (textSections.length) lines.push("", "# Thông tin trên trang", ...textSections);

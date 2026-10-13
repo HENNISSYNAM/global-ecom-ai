@@ -6,7 +6,7 @@ import { SectionList } from "@/components/storefront/Sections";
 import { getSql } from "@/lib/db";
 import { absoluteUrl, storefrontPath } from "@/lib/site";
 import { getPublishedStorefront } from "@/modules/storefront/public-read";
-import { organizationJsonLd, serializeJsonLd } from "@/modules/seo/jsonld";
+import { faqJsonLd, organizationJsonLd, serializeJsonLd } from "@/modules/seo/jsonld";
 
 // Rendered per request from the published version; no shared cache is keyed without tenant + version yet.
 export const dynamic = "force-dynamic";
@@ -35,7 +35,8 @@ export default async function StorefrontPage({ params }: Props) {
   const store = await loadStore(storeSlug);
   if (!store) notFound();
 
-  const jsonLd = organizationJsonLd({ name: store.name, url: absoluteUrl(storefrontPath(store.slug)), brand: store.brand });
+  const faq = faqJsonLd(store.sections.flatMap((s) => (s.type === "faq" ? s.items : [])));
+  const jsonLd = [organizationJsonLd({ name: store.name, url: absoluteUrl(storefrontPath(store.slug)), brand: store.brand }), ...(faq ? [faq] : [])];
   return (
     <StorefrontShell store={store}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }} />

@@ -121,6 +121,16 @@ describe("draft vs published", () => {
     expect(err?.code).toBe("42501");
   });
 
+  it("refuses to publish while bracketed 'chờ xác nhận' notes stand in for business facts", async () => {
+    const htpOwner = { role: "authenticated", userId: "00000000-0000-4000-8000-0000000000d1" } as const;
+    const [htp] = await sql<{ id: string }[]>`select id from storefronts where slug = 'ha-thinh-phat'`;
+    const draft = await getDraft(sql, htpOwner, htp!.id);
+    await expectDomainError(publishStorefront(sql, htpOwner, htp!.id, draft.revision), "invalid");
+    expect(await getPublishedStorefront(sql, "ha-thinh-phat")).toBeNull();
+    // Other tenants still get "not found", not the placeholder error.
+    await expectDomainError(publishStorefront(sql, owner, htp!.id, draft.revision), "not_found");
+  });
+
   it("an unpublished storefront is not reachable publicly", async () => {
     expect(await getPublishedStorefront(sql, "nong-san-thinh-phat")).toBeNull();
     expect(await getPublishedStorefront(sql, "../etc")).toBeNull();

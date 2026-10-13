@@ -89,6 +89,39 @@ export const rfqCtaSection = z
   })
   .strict();
 
+const slug = z.string().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/).max(60);
+
+/**
+ * Cocoon-style category page: one row per product group, group name on the left and a horizontal product rail on
+ * the right. Built from approved catalog data only; empty groups are not shown.
+ */
+export const categoryRowsSection = z
+  .object({
+    type: z.literal("category_rows"),
+    id: z.string().min(1).max(40),
+    title: text(80),
+    intro: optionalText(300),
+    /** Order and labels of the groups; when omitted, every category of approved products is shown. */
+    categories: z
+      .array(z.object({ slug, label: text(40), note: optionalText(160) }).strict())
+      .max(12)
+      .optional(),
+  })
+  .strict();
+
+/** Questions buyers ask, answered by the seller. Also emitted as FAQPage structured data. */
+export const faqSection = z
+  .object({
+    type: z.literal("faq"),
+    id: z.string().min(1).max(40),
+    title: text(120),
+    items: z
+      .array(z.object({ question: text(200), answer: text(800) }).strict())
+      .min(1)
+      .max(12),
+  })
+  .strict();
+
 export const sectionSchema = z.discriminatedUnion("type", [
   announcementSection,
   heroSplitSection,
@@ -96,6 +129,8 @@ export const sectionSchema = z.discriminatedUnion("type", [
   storyPanelSection,
   factListSection,
   rfqCtaSection,
+  categoryRowsSection,
+  faqSection,
 ]);
 
 export const sectionsSchema = z
@@ -115,4 +150,19 @@ export function referencedIds(sections: Section[]): { productIds: string[]; asse
     if ((s.type === "hero_split" || s.type === "story_panel") && s.imageAssetId) assetIds.add(s.imageAssetId);
   }
   return { productIds: [...productIds], assetIds: [...assetIds] };
+}
+
+/** Bracketed notes like "[Chờ Thịnh Phát xác nhận: ...]" mark text the business has not supplied yet. */
+export const PLACEHOLDER_RE = /\[\s*(chờ|cho|cần|can|todo)(?!\p{L})[^\]]*\]/iu;
+
+export function placeholderTexts(value: unknown): string[] {
+  const out: string[] = [];
+  const walk = (v: unknown) => {
+    if (typeof v === "string") {
+      if (PLACEHOLDER_RE.test(v)) out.push(v);
+    } else if (Array.isArray(v)) v.forEach(walk);
+    else if (v && typeof v === "object") Object.values(v).forEach(walk);
+  };
+  walk(value);
+  return out;
 }

@@ -18,8 +18,9 @@ export function absoluteUrl(path: string): string {
 
 /** Public URL of an approved asset in the tenant-public bucket, or null when storage is not configured. */
 export function publicAssetUrl(objectKey: string): string | null {
-  const base = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  if (!base) return null;
   const key = objectKey.split("/").map(encodeURIComponent).join("/");
+  const base = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  // Development without Supabase Storage: approved images live on disk (see modules/media/storage.ts).
+  if (!base) return process.env.NODE_ENV === "production" ? null : `/api/local-media/${key}`;
   return `${base.replace(/\/+$/, "")}/storage/v1/object/public/tenant-public/${key}`;
 }

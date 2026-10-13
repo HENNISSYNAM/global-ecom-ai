@@ -11,9 +11,10 @@ Quyết định kỹ thuật: [`docs/decisions/`](docs/decisions/).
 | Bước | Trạng thái |
 | --- | --- |
 | 1. Tenant, membership, catalog, asset, RLS, storage policies, 2 tenant demo | Đã làm, có kiểm thử trên Postgres thật |
-| 2. Storefront renderer, trang công khai, draft/publish/rollback, JSON-LD, sitemap | Trang công khai + publish đã chạy; **chưa có console/preview cho người bán** |
-| 3. Upload → job/worker → AI draft | Chưa làm |
+| 2. Storefront renderer, trang công khai, draft/publish/rollback, JSON-LD, sitemap | Đã làm. Console người bán sửa giới thiệu, câu chuyện, hỏi đáp, rồi xuất bản; chặn xuất bản khi còn chữ "[Chờ … xác nhận]". Chưa có trang xem trước (preview) |
+| 3. Upload → job/worker → AI draft | Đã làm: `/ban-hang` có trợ lý chat. Tải 1–8 ảnh, ảnh được nén lại và bỏ EXIF, đưa vào hàng đợi có lease, thử lại và dead-letter. AI đọc ảnh (bản nháp `product-draft.v1` đã lọc), trợ lý hỏi 10 câu theo thứ tự khách sỉ, rồi tạo sản phẩm, quy cách, giá, bằng chứng người bán, duyệt ảnh lên gian hàng |
 | 4. RFQ → báo giá → đơn hàng | Chưa làm (nút hỏi giá hiện ghi rõ là chưa nhận yêu cầu) |
+| Bố cục học từ Cocoon | Khối `category_rows` (tên nhóm bên trái, sản phẩm chạy ngang) và `faq` (kèm JSON-LD FAQPage). Gian hàng nháp Hà Thịnh Phát có trong seed local |
 | Chatbot hỏi đáp trên gian hàng | Đã làm: chỉ trả lời từ bản đã xuất bản. Dùng nhà cung cấp kiểu OpenAI-compatible (`AI_BASE_URL`/`AI_API_KEY`/`AI_MODEL`) hoặc Claude (`ANTHROPIC_API_KEY`); chưa cấu hình thì trả lời tự động theo từ khóa, ghi rõ "chưa dùng AI" |
 | Nhập dữ liệu từ website người bán | Công cụ đã có và đã test với website giả; **chưa chạy với nongsanthinhphat.com** vì môi trường chặn tên miền |
 

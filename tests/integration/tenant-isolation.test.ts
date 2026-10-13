@@ -130,7 +130,7 @@ describe("tenant isolation (RLS + constraints)", () => {
 describe("anonymous visitors", () => {
   it("cannot read catalog, assets, memberships or audit tables", async () => {
     await inRollback(sql, async (tx) => {
-      for (const table of ["products", "variants", "offers", "assets", "product_evidence", "memberships", "audit_events", "tenants"]) {
+      for (const table of ["products", "variants", "offers", "assets", "product_evidence", "memberships", "audit_events", "tenants", "ai_jobs", "ai_job_assets"]) {
         const err = await sqlError(as(tx, "anon", (t) => t.unsafe(`select 1 from public.${table} limit 1`)));
         expect(err.code, table).toBe("42501");
       }
@@ -151,8 +151,9 @@ describe("anonymous visitors", () => {
       select p.oid::regprocedure::text as fn, has_function_privilege('anon', p.oid, 'execute') as allowed
       from pg_proc p
       where p.pronamespace = 'public'::regnamespace
-        and p.proname in ('create_tenant', 'approve_product', 'create_storefront', 'publish_storefront', 'rollback_storefront')`;
-    expect(rows.length).toBe(5);
+        and p.proname in ('create_tenant', 'approve_product', 'create_storefront', 'publish_storefront', 'rollback_storefront',
+                          'enqueue_product_analysis', 'link_ai_job_product')`;
+    expect(rows.length).toBe(7);
     expect(rows.filter((r) => r.allowed).map((r) => r.fn)).toEqual([]);
   });
 

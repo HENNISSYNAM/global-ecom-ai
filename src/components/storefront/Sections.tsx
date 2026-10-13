@@ -1,3 +1,4 @@
+import { categoryLabel } from "@/modules/catalog/categories";
 import type { PublishedStorefront } from "@/modules/storefront/public-read";
 import type { Section } from "@/modules/storefront/sections";
 import type { SnapshotAsset } from "@/modules/storefront/snapshot";
@@ -127,6 +128,66 @@ function SectionView({
                 </li>
               ))}
             </ul>
+          </div>
+        </section>
+      );
+
+    case "category_rows": {
+      const approved = store.catalog.products;
+      const groups = (
+        section.categories ??
+        [...new Set(approved.map((p) => p.category))].map((slug) => ({ slug: slug ?? "", label: categoryLabel(slug), note: undefined }))
+      )
+        .map((g) => ({ ...g, products: approved.filter((p) => (p.category ?? "") === g.slug) }))
+        .filter((g) => g.products.length > 0);
+      const anchor = store.sections.some((x) => x.type === "product_rail") ? undefined : "san-pham";
+      return (
+        <section className="sf-section" id={anchor} aria-labelledby={`${section.id}-title`}>
+          <div className="sf-container">
+            <h2 id={`${section.id}-title`} className="sf-h2">
+              {section.title}
+            </h2>
+            {section.intro && <p className="sf-lead">{section.intro}</p>}
+            {groups.length ? (
+              groups.map((g) => (
+                <div className="sf-rail sf-catrow" key={g.slug || "khac"}>
+                  <div>
+                    <h3 className="sf-cat-title">{g.label}</h3>
+                    {g.note && <p className="sf-muted-text">{g.note}</p>}
+                    <p className="sf-cat-count">{g.products.length} sản phẩm</p>
+                  </div>
+                  <div className="sf-rail-track" role="list">
+                    {g.products.map((p) => (
+                      <div role="listitem" key={p.id}>
+                        <ProductCard storeSlug={store.slug} product={p} image={asset(p.imageAssetIds[0])} />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="sf-empty">Chưa có sản phẩm nào được người bán duyệt để xuất bản.</p>
+            )}
+          </div>
+        </section>
+      );
+    }
+
+    case "faq":
+      return (
+        <section className="sf-section" id="hoi-dap" aria-labelledby={`${section.id}-title`}>
+          <div className="sf-container sf-faq">
+            <h2 id={`${section.id}-title`} className="sf-h2">
+              {section.title}
+            </h2>
+            <div>
+              {section.items.map((item) => (
+                <details key={item.question} className="sf-faq-item">
+                  <summary>{item.question}</summary>
+                  <p>{item.answer}</p>
+                </details>
+              ))}
+            </div>
           </div>
         </section>
       );

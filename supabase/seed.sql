@@ -1,4 +1,4 @@
--- LOCAL/DEMO SEED. Two tenants used for development and isolation tests.
+-- LOCAL/DEMO SEED. Three tenants used for development and isolation tests.
 --
 -- Tenant A "Vườn Mẫu (DEMO)" is entirely fictional: product names, prices and quantities are illustrative and
 -- the storefront shows a demo banner and is excluded from search indexes.
@@ -129,5 +129,48 @@ update public.storefront_versions set
     {"type": "rfq_cta", "id": "hoi-gia", "title": "Yêu cầu báo giá sỉ", "buttonLabel": "Gửi yêu cầu báo giá"}
   ]'
 where storefront_id = (select id from public.storefronts where slug = 'nong-san-thinh-phat') and kind = 'draft';
+
+select set_config('request.jwt.claims', '', false);
+
+-- ----------------------------------------------------------------------------- Tenant C (Hà Thịnh Phát, unconfirmed)
+--
+-- Local draft only. No public facts about Hà Thịnh Phát were found (website unreachable from the build environment,
+-- no matching business listing for garlic/produce), so the layout follows the Cocoon-inspired structure and every
+-- business-specific text is a bracketed note. The publish guard refuses to publish while such notes remain.
+
+insert into auth.users (id, email) values ('00000000-0000-4000-8000-0000000000d1', 'owner-htp@demo.test');
+insert into public.tenants (id, name, is_demo) values ('1c000000-0000-4000-8000-000000000001', 'Hà Thịnh Phát', true);
+insert into public.memberships (tenant_id, user_id, role) values
+  ('1c000000-0000-4000-8000-000000000001', '00000000-0000-4000-8000-0000000000d1', 'owner');
+
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-4000-8000-0000000000d1","role":"authenticated"}', false);
+select public.create_storefront('1c000000-0000-4000-8000-000000000001', 'ha-thinh-phat', 'Hà Thịnh Phát');
+
+update public.storefront_versions set
+  brand = '{"businessName": "Hà Thịnh Phát"}',
+  sections = '[
+    {"type": "announcement", "id": "thong-bao", "text": "[Chờ Hà Thịnh Phát xác nhận: khu vực giao và giờ nhận đơn]"},
+    {"type": "hero_split", "id": "mo-dau", "eyebrow": "[Chờ xác nhận: nhóm hàng chính · khu vực]", "titleLead": "Tỏi và gia vị",
+     "titleEmphasis": "sơ chế sẵn", "body": "[Chờ Hà Thịnh Phát xác nhận: nguồn hàng, cách sơ chế, nhóm khách phục vụ]",
+     "cta": {"label": "Xem nhóm hàng", "target": "catalog"}, "imageSide": "left"},
+    {"type": "category_rows", "id": "nhom-hang", "title": "Nhóm hàng",
+     "intro": "Mỗi nhóm một hàng: chọn quy cách, xem xuất xứ và đơn tối thiểu trên từng sản phẩm."},
+    {"type": "story_panel", "id": "cau-chuyen", "eyebrow": "Câu chuyện", "title": "[Chờ xác nhận: tên cơ sở và người làm]",
+     "body": "[Chờ Hà Thịnh Phát cung cấp: thành lập khi nào, ở đâu, sơ chế thế nào, ảnh xưởng thật]"},
+    {"type": "fact_list", "id": "quy-trinh", "variant": "process", "title": "Từ củ tươi đến túi hàng",
+     "items": [{"title": "Nhập hàng", "body": "[Chờ xác nhận: nguồn và cách chọn nguyên liệu]"},
+               {"title": "Sơ chế", "body": "[Chờ xác nhận: bóc/gọt, rửa, phân loại]"},
+               {"title": "Đóng gói", "body": "[Chờ xác nhận: quy cách túi/thùng, ngày đóng gói]"}]},
+    {"type": "fact_list", "id": "giao-hang", "variant": "delivery", "title": "Đặt và giao hàng",
+     "items": [{"title": "Đơn tối thiểu", "body": "Ghi theo từng quy cách trên trang sản phẩm."},
+               {"title": "Phí giao", "body": "[Chờ xác nhận: cách tính phí giao]"}]},
+    {"type": "faq", "id": "hoi-dap", "title": "Câu hỏi thường gặp",
+     "items": [{"question": "Có xuất hóa đơn VAT không?", "answer": "[Chờ Hà Thịnh Phát xác nhận]"},
+               {"question": "Hàng giữ được bao lâu?", "answer": "[Chờ xác nhận theo từng sản phẩm]"}]},
+    {"type": "rfq_cta", "id": "hoi-gia", "title": "Cần báo giá sỉ?",
+     "body": "Gửi mặt hàng, quy cách, số lượng, nơi giao và ngày cần — người bán xác nhận giá và phí giao.",
+     "buttonLabel": "Gửi yêu cầu báo giá"}
+  ]'
+where storefront_id = (select id from public.storefronts where slug = 'ha-thinh-phat') and kind = 'draft';
 
 select set_config('request.jwt.claims', '', false);

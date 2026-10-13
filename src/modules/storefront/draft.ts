@@ -2,7 +2,7 @@ import { z } from "zod";
 import { withActor, type Actor, type Sql, type Tx } from "@/lib/db";
 import { DomainError, fromPgError } from "@/lib/errors";
 import { brandSchema, type Brand } from "./brand";
-import { referencedIds, sectionsSchema, type Section } from "./sections";
+import { placeholderTexts, referencedIds, sectionsSchema, type Section } from "./sections";
 import { themeSchema, type Theme } from "./theme";
 
 /**
@@ -101,10 +101,17 @@ export async function publishStorefront(
   expectedRevision: number,
 ): Promise<{ versionId: string }> {
   try {
-    const rows = await withActor(sql, actor, (tx) => tx<{ id: string }[]>`
-      select public.publish_storefront(${storefrontId}, ${expectedRevision}) as id
-    `);
-    return { versionId: rows[0]!.id };
+    return await withActor(sql, actor, async (tx) => {
+      // Never publish notes that stand in for facts the business has not supplied yet.
+      const draft = await loadDraft(tx, storefrontId);
+      const pending = draft ? placeholderTexts([draft.sections, draft.brand]) : [];
+      if (pending.length)
+        throw new DomainError("invalid", "Gian hàng còn nội dung chờ xác nhận; hãy thay trước khi xuất bản", { pending });
+      const rows = await tx<{ id: string }[]>`
+        select public.publish_storefront(${storefrontId}, ${expectedRevision}) as id
+      `;
+      return { versionId: rows[0]!.id };
+    });
   } catch (err) {
     throw fromPgError(err) ?? err;
   }
