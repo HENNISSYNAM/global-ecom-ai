@@ -147,3 +147,15 @@ describe("OpenAI-compatible provider", () => {
     expect(defaultChatProvider({}).name).toBe("mock");
   });
 });
+
+describe("wholesale quote-intake flow in the assistant rules", () => {
+  it("asks for the five required facts and hands off a quote request without promising price or delivery", async () => {
+    const { ASSISTANT_RULES } = await import("@/modules/assistant/context");
+    for (const fact of ["mặt hàng", "quy cách và đơn vị", "số lượng và tần suất", "nơi giao", "số điện thoại hoặc Zalo"]) {
+      expect(ASSISTANT_RULES).toContain(fact);
+    }
+    expect(ASSISTANT_RULES).toContain("YÊU CẦU BÁO GIÁ");
+    expect(ASSISTANT_RULES).toContain("không giảm giá");
+    expect(ASSISTANT_RULES).toContain("không hứa giao trong ngày");
+  });
+});
