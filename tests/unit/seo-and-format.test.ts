@@ -75,3 +75,22 @@ describe("formatting", () => {
     expect(originLabel("VN", "Lâm Đồng")).toBe("Lâm Đồng, Việt Nam");
   });
 });
+
+describe("siteUrl", () => {
+  it("normalizes dashboard-style values and never throws", async () => {
+    const { siteUrl } = await import("@/lib/site");
+    expect(siteUrl({ SITE_URL: "global-ecom-ai.vercel.app" })).toBe("https://global-ecom-ai.vercel.app");
+    expect(siteUrl({ SITE_URL: " https://shop.vn/ " })).toBe("https://shop.vn");
+    expect(siteUrl({ SITE_URL: "http://localhost:3100/x" })).toBe("http://localhost:3100");
+    expect(siteUrl({ SITE_URL: "not a url", VERCEL_PROJECT_PRODUCTION_URL: "p.vercel.app" })).toBe("https://p.vercel.app");
+    expect(siteUrl({})).toBe("http://localhost:3000");
+  });
+});
+
+describe("database diagnosis", () => {
+  it("explains a missing or malformed DATABASE_URL without connecting", async () => {
+    const { diagnoseDatabase } = await import("@/lib/db-diagnostics");
+    expect(await diagnoseDatabase({})).toMatchObject({ ok: false, problem: "missing_database_url" });
+    expect(await diagnoseDatabase({ DATABASE_URL: "https://example.com" })).toMatchObject({ ok: false, problem: "invalid_database_url" });
+  });
+});

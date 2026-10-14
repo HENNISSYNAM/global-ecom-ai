@@ -33,7 +33,15 @@ export default async function SellerConsole({ params }: { params: Promise<{ tena
     <main className="sa-page sa-page--wide">
       <header className="sa-head">
         <div>
-          <p className="sa-muted">Trợ lý bán hàng</p>
+          <p className="sa-muted">
+            Trợ lý bán hàng
+            {shop.role !== "viewer" && (
+              <>
+                {" · "}
+                <Link href={`/ban-hang/${tenantId}/hoi-gia`}>Yêu cầu báo giá</Link>
+              </>
+            )}
+          </p>
           <h1 className="sa-title">{shop.tenantName}</h1>
         </div>
         <div className="sa-publish">

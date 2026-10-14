@@ -108,3 +108,14 @@ describe("image normalization", () => {
     expect(out.sha256).toMatch(/^[0-9a-f]{64}$/);
   });
 });
+
+describe("quote line totals", () => {
+  it("match the database rounding exactly, without floating point", async () => {
+    const { lineTotal } = await import("@/components/rfq/QuoteForm");
+    expect(lineTotal("1.333", "100001")).toBe(133301n);
+    expect(lineTotal("20", "120.000")).toBe(2_400_000n);
+    expect(lineTotal("0.005", "100")).toBe(1n); // 0.5 rounds half up
+    expect(lineTotal("1,5", "33333")).toBe(50000n); // 49999.5 → 50000
+    expect(lineTotal("abc", "1")).toBeNull();
+  });
+});

@@ -1,6 +1,6 @@
 # Deploy lên Vercel
 
-Ứng dụng là Next.js chuẩn. `vercel.json` chỉ khai báo một cron mỗi ngày gọi `/api/cron/ai-jobs` để quét lại các lượt phân tích ảnh bị dở.
+Ứng dụng là Next.js chuẩn. `vercel.json` khai báo `"framework": "nextjs"` (để Vercel không dùng preset "Other" rồi đi tìm thư mục `public`) và một cron mỗi ngày gọi `/api/cron/ai-jobs` để quét lại các lượt phân tích ảnh bị dở.
 
 ## Điều kiện trước khi deploy
 
@@ -19,7 +19,9 @@ trang gian hàng sẽ lỗi.** Cần một Postgres (khuyên dùng Supabase proj
 ## Các bước
 
 1. vercel.com → **Add New… → Project** → chọn repo `HENNISSYNAM/global-ecom-ai` → Framework: Next.js (tự nhận).
-2. **Environment Variables** (Production và Preview):
+2. **Environment Variables** (Production và Preview). `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` và `AI_BASE_URL`
+   đã có sẵn trong `.env.production` (giá trị công khai); `SITE_URL` tự lấy tên miền Vercel nếu để trống. Bắt buộc đặt
+   trên Vercel: `DATABASE_URL`. Nên đặt thêm: `SUPABASE_SERVICE_ROLE_KEY` (lưu ảnh), `AI_API_KEY` + `AI_MODEL`, `CRON_SECRET`.
 
    | Biến | Giá trị |
    | --- | --- |
@@ -48,4 +50,6 @@ trang gian hàng sẽ lỗi.** Cần một Postgres (khuyên dùng Supabase proj
   ngày. Không cần worker riêng; Vercel gói Hobby chỉ cho cron một lần/ngày.
 - Request tải ảnh lên Vercel tối đa khoảng 4,5 MB. Trình duyệt thu nhỏ ảnh về 1600 px trước khi gửi. Ảnh HEIC trên
   trình duyệt không đọc được HEIC sẽ được gửi nguyên kích thước.
-- Chưa có trang xem trước (preview) bản nháp. Biểu mẫu hỏi giá (RFQ) chưa làm.
+- Chưa có trang xem trước (preview) bản nháp.
+- Chưa gửi email/Zalo báo khi có yêu cầu mới hoặc báo giá mới. Người bán xem ở mục "Yêu cầu báo giá" và tự nhắn khách mở
+  lại đường dẫn riêng. Giới hạn số lần gửi yêu cầu cũng tính riêng trên từng instance.
