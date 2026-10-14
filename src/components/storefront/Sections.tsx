@@ -4,6 +4,7 @@ import { RfqForm } from "@/components/rfq/RfqForm";
 import type { PublishedStorefront } from "@/modules/storefront/public-read";
 import type { Section } from "@/modules/storefront/sections";
 import type { SnapshotAsset } from "@/modules/storefront/snapshot";
+import { AutoRail } from "./AutoRail";
 import { Media } from "./Media";
 import { ProductCard } from "./ProductCard";
 
@@ -80,13 +81,13 @@ function SectionView({
               {section.intro && <p className="sf-lead">{section.intro}</p>}
             </div>
             {products.length ? (
-              <div className="sf-rail-track" role="list">
+              <AutoRail>
                 {products.map((p) => (
                   <div role="listitem" key={p.id}>
                     <ProductCard storeSlug={store.slug} product={p} image={asset(p.imageAssetIds[0])} />
                   </div>
                 ))}
-              </div>
+              </AutoRail>
             ) : (
               <p className="sf-empty">Chưa có sản phẩm nào được người bán duyệt để xuất bản.</p>
             )}
@@ -158,13 +159,13 @@ function SectionView({
                     {g.note && <p className="sf-muted-text">{g.note}</p>}
                     <p className="sf-cat-count">{g.products.length} sản phẩm</p>
                   </div>
-                  <div className="sf-rail-track" role="list">
+                  <AutoRail>
                     {g.products.map((p) => (
                       <div role="listitem" key={p.id}>
                         <ProductCard storeSlug={store.slug} product={p} image={asset(p.imageAssetIds[0])} />
                       </div>
                     ))}
-                  </div>
+                  </AutoRail>
                 </div>
               ))
             ) : (
