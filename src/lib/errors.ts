@@ -18,6 +18,9 @@ export function fromPgError(err: unknown): DomainError | null {
   if (e.code === "P0002") return new DomainError("not_found", e.message ?? "Không tìm thấy");
   if (e.code === "P0001" && e.message?.startsWith("version_conflict"))
     return new DomainError("conflict", "Bản nháp đã thay đổi; hãy tải lại trước khi xuất bản");
+  if (e.code === "P0001" && e.message?.startsWith("quote_unavailable"))
+    return new DomainError("conflict", "Báo giá không còn hiệu lực hoặc yêu cầu đã chốt", { reason: e.message.slice(19) });
+  if (e.code === "22023") return new DomainError("invalid", e.message ?? "Dữ liệu không hợp lệ");
   if (e.code === "23505") return new DomainError("conflict", "Dữ liệu bị trùng");
   if (e.code === "23514" || e.code === "23503" || e.code === "22P02")
     return new DomainError("invalid", e.message ?? "Dữ liệu không hợp lệ");

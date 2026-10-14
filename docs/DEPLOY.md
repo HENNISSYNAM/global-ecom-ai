@@ -48,4 +48,6 @@ trang gian hàng sẽ lỗi.** Cần một Postgres (khuyên dùng Supabase proj
   ngày. Không cần worker riêng; Vercel gói Hobby chỉ cho cron một lần/ngày.
 - Request tải ảnh lên Vercel tối đa khoảng 4,5 MB. Trình duyệt thu nhỏ ảnh về 1600 px trước khi gửi. Ảnh HEIC trên
   trình duyệt không đọc được HEIC sẽ được gửi nguyên kích thước.
-- Chưa có trang xem trước (preview) bản nháp. Biểu mẫu hỏi giá (RFQ) chưa làm.
+- Chưa có trang xem trước (preview) bản nháp.
+- Chưa gửi email/Zalo báo khi có yêu cầu mới hoặc báo giá mới. Người bán xem ở mục "Yêu cầu báo giá" và tự nhắn khách mở
+  lại đường dẫn riêng. Giới hạn số lần gửi yêu cầu cũng tính riêng trên từng instance.

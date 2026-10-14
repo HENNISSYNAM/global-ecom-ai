@@ -1,4 +1,6 @@
 import { categoryLabel } from "@/modules/catalog/categories";
+import { SALE_UNIT_LABEL } from "@/modules/catalog/format";
+import { RfqForm } from "@/components/rfq/RfqForm";
 import type { PublishedStorefront } from "@/modules/storefront/public-read";
 import type { Section } from "@/modules/storefront/sections";
 import type { SnapshotAsset } from "@/modules/storefront/snapshot";
@@ -201,11 +203,22 @@ function SectionView({
                 {section.title}
               </h2>
               {section.body && <p className="sf-lead">{section.body}</p>}
-              {/* The RFQ flow is built in step 4; until then the button states what actually happens. */}
-              <span className="sf-btn" role="link" aria-disabled="true">
-                {section.buttonLabel}
-              </span>
-              <p className="sf-note">Biểu mẫu hỏi giá trực tuyến đang được xây dựng và chưa nhận yêu cầu.</p>
+              <details className="sf-rfq-details">
+                <summary className="sf-btn">{section.buttonLabel}</summary>
+                <RfqForm
+                  storeSlug={store.slug}
+                  products={store.catalog.products.flatMap((p) =>
+                    p.variants.map((v) => ({
+                      productId: p.id,
+                      variantId: v.id,
+                      name: p.name,
+                      packLabel: v.packDescription,
+                      unitLabel: SALE_UNIT_LABEL[v.saleUnit],
+                      minOrderQty: v.minOrderQty,
+                    })),
+                  )}
+                />
+              </details>
             </div>
           </div>
         </section>
