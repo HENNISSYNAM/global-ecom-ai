@@ -1,7 +1,21 @@
 /** Canonical URL helpers. SITE_URL is the single canonical origin for storefront pages. */
 
-export function siteUrl(): string {
-  return (process.env.SITE_URL ?? "http://localhost:3000").replace(/\/+$/, "");
+/**
+ * Accepts "https://shop.vn", "shop.vn" or "shop.vn/" (a common copy-paste in hosting dashboards) and falls back to
+ * Vercel's own production hostname, then localhost. Never throws: an invalid value must not break the build.
+ */
+export function siteUrl(env: Record<string, string | undefined> = process.env): string {
+  for (const raw of [env.SITE_URL, env.VERCEL_PROJECT_PRODUCTION_URL, env.VERCEL_URL]) {
+    const v = raw?.trim();
+    if (!v) continue;
+    try {
+      const url = new URL(/^https?:\/\//i.test(v) ? v : `https://${v}`);
+      return url.origin;
+    } catch {
+      // try the next candidate
+    }
+  }
+  return "http://localhost:3000";
 }
 
 export function storefrontPath(storeSlug: string): string {
