@@ -1,6 +1,6 @@
 # Deploy lên Vercel
 
-Ứng dụng là Next.js chuẩn. `vercel.json` chỉ khai báo một cron mỗi ngày gọi `/api/cron/ai-jobs` để quét lại các lượt phân tích ảnh bị dở.
+Ứng dụng là Next.js chuẩn. `vercel.json` khai báo `"framework": "nextjs"` (để Vercel không dùng preset "Other" rồi đi tìm thư mục `public`) và một cron mỗi ngày gọi `/api/cron/ai-jobs` để quét lại các lượt phân tích ảnh bị dở.
 
 ## Điều kiện trước khi deploy
 
