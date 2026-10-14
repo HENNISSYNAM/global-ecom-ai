@@ -86,3 +86,11 @@ describe("siteUrl", () => {
     expect(siteUrl({})).toBe("http://localhost:3000");
   });
 });
+
+describe("database diagnosis", () => {
+  it("explains a missing or malformed DATABASE_URL without connecting", async () => {
+    const { diagnoseDatabase } = await import("@/lib/db-diagnostics");
+    expect(await diagnoseDatabase({})).toMatchObject({ ok: false, problem: "missing_database_url" });
+    expect(await diagnoseDatabase({ DATABASE_URL: "https://example.com" })).toMatchObject({ ok: false, problem: "invalid_database_url" });
+  });
+});
