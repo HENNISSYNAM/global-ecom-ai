@@ -19,7 +19,9 @@ trang gian hàng sẽ lỗi.** Cần một Postgres (khuyên dùng Supabase proj
 ## Các bước
 
 1. vercel.com → **Add New… → Project** → chọn repo `HENNISSYNAM/global-ecom-ai` → Framework: Next.js (tự nhận).
-2. **Environment Variables** (Production và Preview):
+2. **Environment Variables** (Production và Preview). `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` và `AI_BASE_URL`
+   đã có sẵn trong `.env.production` (giá trị công khai); `SITE_URL` tự lấy tên miền Vercel nếu để trống. Bắt buộc đặt
+   trên Vercel: `DATABASE_URL`. Nên đặt thêm: `SUPABASE_SERVICE_ROLE_KEY` (lưu ảnh), `AI_API_KEY` + `AI_MODEL`, `CRON_SECRET`.
 
    | Biến | Giá trị |
    | --- | --- |
